@@ -10,13 +10,23 @@ import android.graphics.BitmapFactory;
 import android.graphics.Paint;
 import android.graphics.Color;
 import android.view.View;
+import android.view.MotionEvent;
+import android.widget.ImageView;
+import android.util.Log;
 
 public class Deck extends View
 {
+    private static final String TAG = "Deck";
+
     public static final int WON = 1;
     public static final int LOST = 2;
+    
+    private int height, width;
 
+    private ImageView boardView;
+    private Bitmap board;
     private Bitmap blankCard;
+
     private int[] cardArray = {
         R.drawable.card0,
         R.drawable.card1,
@@ -76,8 +86,11 @@ public class Deck extends View
     private final int rows = 4;
 
     // TODO dynamic padding
-    private final int horizontalPadding = 0;
-    private final int verticalPadding = 5;
+    private final int horizontalPadding = 100;
+    private final int verticalPadding = 60;
+
+    private final int cardWidth = 54;
+    private final int cardHeight = 72;
 
     private final int[][] cardPositions =
         {
@@ -102,6 +115,7 @@ public class Deck extends View
 
     private int[] cards;
     private Bitmap[] cardImages;
+    private ImageView[] cardViews;
 
     private int stackCard;
     private int stackPos;
@@ -116,6 +130,35 @@ public class Deck extends View
     private int currentWorth;
     private int pyramidBonus;
 
+    private void setBitmaps(Context context)
+    {
+        this.blankCard = BitmapFactory.decodeResource(getResources(),
+            R.drawable.cardblank);
+
+        this.board = BitmapFactory.decodeResource(getResources(),
+            R.drawable.board);
+        this.boardView = new ImageView(context);
+        this.boardView.setImageBitmap(this.board);
+
+        for (int i = 0; i < this.numberOfCards; ++i)
+        {
+            this.cardImages[i] = BitmapFactory.decodeResource(getResources(),
+                this.cardArray[i]);
+            /*
+            this.cardViews[i] = new ImageView(context);
+            this.cardViews[i] = (ImageView) findViewById(this.cardArray[i]);
+            this.cardViews[i].setOnClickListener(new OnClickListener()
+                    {
+                        public void onClick(View v)
+                        {
+                            //Deck currentDeck = (Deck) v;
+                            //currentDeck.cards[5] = -1;
+                        }
+                    });
+                    */
+        }
+    }
+
     private void shuffle()
     {
         Random generator = new Random();
@@ -127,11 +170,6 @@ public class Deck extends View
             temp = this.cards[i];
             this.cards[i] = this.cards[randomCard];
             this.cards[randomCard] = temp;
-        }
-        for (int i = 0; i < this.numberOfCards; ++i)
-        {
-            this.cardImages[i] = BitmapFactory.decodeResource(getResources(),
-                this.cardArray[i]);
         }
     }
 
@@ -239,6 +277,10 @@ public class Deck extends View
         }
         ++this.stackPos;
         --this.stackRest;
+
+        String s = ">>> stackPos: " + this.stackPos;
+        Log.v(TAG, s);
+
         this.stackCard = cards[this.stackPos];
         return 0;
     }
@@ -275,37 +317,18 @@ public class Deck extends View
         return this.score;
     }
 
-    public int move(String s)
+    public int move(int i)
     {
-        if (s.equals("exit") || s.equals("quit"))
+        if (isNeighbor(i))
         {
-            System.exit(0);
-        }
-        if (s.equals("n"))
-        {
-            newRun();
-            return nextStack();
-        }
-        int num = valueToNum(s);
-
-        if (num < 0)
-            return 0;
-
-        for (int i = 0; i < 28; ++i)
-        {
-            if (cards[i] == num && isNeighbor(i))
-            {
-                if (i > 17 || isFree(i))
-                {
-                    this.stackCard = cards[i];
-                    --this.cardsToGo;
-                    ++this.run;
-                    deleteCard(i);
-                    score(i);
-                    if (haveIWon())
-                        return 1;
-                }
-            }
+            this.stackCard = cards[i];
+            --this.cardsToGo;
+            ++this.run;
+            deleteCard(i);
+            score(i);
+            if (haveIWon())
+                return 1;
+            invalidate();
         }
         return 0;
     }
@@ -358,10 +381,80 @@ public class Deck extends View
     }
 
     @Override
+    public boolean onTouchEvent(final MotionEvent ev)
+    {
+        int pos = 0;
+        int x = ((int)ev.getX()) - this.horizontalPadding;
+        int y = ((int)ev.getY()) - this.verticalPadding;
+
+        if (ev.getAction() != MotionEvent.ACTION_DOWN)
+            return true;
+
+        // Stack
+        if (x >= 0 && x <= (this.stackRest-2)*12 + this.cardWidth &&
+                y >= 215 && y <= 215 + this.cardHeight)
+        {
+            newRun();
+            nextStack();
+            invalidate();
+        }
+
+        for (int i = 0; i < this.cardPositions.length; ++i)
+        {
+            for (int j = 0; j < this.cardPositions[i].length; ++j)
+            {
+                int cardX = this.cardPositions[i][j];
+                int cardY = i*36;
+
+                if (
+                        (x >= cardX) &&
+                        (x <= cardX + this.cardWidth) &&
+                        (y >= cardY) &&
+                        (y <= cardY + this.cardHeight) &&
+                        (pos > 17 || isFree(pos))
+                        )
+                {
+                    String s = ": " + pos;
+                    Log.v(TAG, s);
+                    move(pos);
+                }
+                ++pos;
+            }
+        }
+        return true;
+    }
+
+    @Override
     public void onDraw(Canvas canvas)
     {
         int pos = 0;
+
         Bitmap currentCard;
+
+        canvas.drawBitmap(this.board,
+                this.horizontalPadding-5,
+                this.verticalPadding-5, null);
+
+        Paint paint = new Paint();
+        paint.setColor(Color.BLACK);
+        paint.setTextSize(18);
+        paint.setAntiAlias(true);
+
+        String text = "Run: " + this.run;
+        canvas.drawText(text,
+                horizontalPadding + 10,
+                verticalPadding - 10,
+                paint);
+        text = "Score: " + this.score;
+        canvas.drawText(text,
+                horizontalPadding + 230,
+                verticalPadding - 10,
+                paint);
+        text = "Round: " + this.round;
+        canvas.drawText(text,
+                horizontalPadding + 460,
+                verticalPadding - 10,
+                paint);
 
         for (int i = 0; i < this.rows; ++i)
         {
@@ -370,7 +463,7 @@ public class Deck extends View
                 if (!isDeleted(pos))
                 {
                     if ((i < this.rows-1 && isFree(pos)) || (i >= this.rows-1))
-                        currentCard = this.cardImages[pos];
+                        currentCard = this.cardImages[this.cards[pos]];
                     else
                         currentCard = this.blankCard;
 
@@ -386,12 +479,15 @@ public class Deck extends View
         {
             canvas.drawBitmap(this.blankCard,
                     this.horizontalPadding + i*12,
-                    this.verticalPadding + 220, null);
+                    this.verticalPadding + 215, null);
         }
+
+        String s = ">>> stackCard: " + this.stackCard;
+        Log.v(TAG, s);
 
         canvas.drawBitmap(this.cardImages[this.stackCard],
                 this.horizontalPadding + 350,
-                this.verticalPadding + 220, null);
+                this.verticalPadding + 215, null);
     }
 
     public Deck(Context context)
@@ -399,8 +495,7 @@ public class Deck extends View
         super(context);
         cards = new int[numberOfCards];
         cardImages = new Bitmap[numberOfCards];
-        this.blankCard = BitmapFactory.decodeResource(getResources(),
-            R.drawable.cardblank);
+        cardViews = new ImageView[numberOfCards];
         for (int i = 0; i < numberOfCards; ++i)
         {
             cards[i] = i;
@@ -415,6 +510,7 @@ public class Deck extends View
         this.currentWorth = 10;
         this.round = 1;
         this.pyramidBonus = 500;
+        setBitmaps(context);
     }
 
     public Deck(Context context, int round, int score)

@@ -1,40 +1,23 @@
 package com.example.pyramids;
-import java.io.*;
 
-public class Pyramids
+import android.app.Activity;
+import android.graphics.Color;
+import android.os.Bundle;
+
+public class Pyramids extends Activity
 {
-    /*
-    public static void main(String[] args)
-    {
-        InputStreamReader conv = new InputStreamReader(System.in);
-        BufferedReader in = new BufferedReader(conv);
-        Deck deck = new Deck();
-        String line = "";
-        boolean gameOver = false;
+    Deck deck;
 
-        while (!gameOver)
-        {
-            try
-            {
-                deck.print();
-                System.out.print("% ");
-                line = in.readLine();
-                switch (deck.move(line))
-                {
-                    case Deck.WON:
-                        System.out.println("\n *** You won ***");
-                        deck = new Deck(
-                                deck.currentRound()+1,
-                                deck.currentScore()
-                                );
-                        break;
-                    case Deck.LOST:
-                        System.out.println("\nYou lost.");
-                        gameOver = true;
-                        break;
-                }
-            } catch (IOException e) {}
-        }
+    /** Called when the activity is first created. */
+    @Override
+    public void onCreate(Bundle savedInstanceState)
+    {
+        super.onCreate(savedInstanceState);
+
+        deck = new Deck(this);
+        deck.setBackgroundColor(0xff999966);
+
+        setContentView(deck);
+        //setContentView(R.layout.main);
     }
-    */
 }
