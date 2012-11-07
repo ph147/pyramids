@@ -282,6 +282,9 @@ public class Deck extends View
         Log.v(TAG, s);
 
         this.stackCard = cards[this.stackPos];
+
+        s = ">>> stackCard: " + getValue(this.stackCard);
+        Log.v(TAG, s);
         return 0;
     }
 
@@ -322,6 +325,11 @@ public class Deck extends View
         if (isNeighbor(i))
         {
             this.stackCard = cards[i];
+
+            String s = ">>> stackCard (move): " + getValue(this.stackCard)
+                                                  + ", i: " + i;
+            Log.v(TAG, s);
+
             --this.cardsToGo;
             ++this.run;
             deleteCard(i);
@@ -411,6 +419,7 @@ public class Deck extends View
                         (x <= cardX + this.cardWidth) &&
                         (y >= cardY) &&
                         (y <= cardY + this.cardHeight) &&
+                        (!isDeleted(pos)) &&
                         (pos > 17 || isFree(pos))
                         )
                 {
@@ -482,7 +491,7 @@ public class Deck extends View
                     this.verticalPadding + 215, null);
         }
 
-        String s = ">>> stackCard: " + this.stackCard;
+        String s = ">>> stackCard (onDraw): " + getValue(this.stackCard);
         Log.v(TAG, s);
 
         canvas.drawBitmap(this.cardImages[this.stackCard],
