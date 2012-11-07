@@ -23,9 +23,10 @@ public class Deck extends View
     
     private int height, width;
 
-    private ImageView boardView;
     private Bitmap board;
     private Bitmap blankCard;
+    private Bitmap clickHere;
+    private Bitmap gameOverField;
 
     private int[] cardArray = {
         R.drawable.card0,
@@ -115,7 +116,6 @@ public class Deck extends View
 
     private int[] cards;
     private Bitmap[] cardImages;
-    private ImageView[] cardViews;
 
     private int stackCard;
     private int stackPos;
@@ -132,30 +132,19 @@ public class Deck extends View
 
     private void setBitmaps(Context context)
     {
+        this.clickHere = BitmapFactory.decodeResource(getResources(),
+            R.drawable.clickhere);
+        this.gameOverField = BitmapFactory.decodeResource(getResources(),
+            R.drawable.gameover);
         this.blankCard = BitmapFactory.decodeResource(getResources(),
             R.drawable.cardblank);
-
         this.board = BitmapFactory.decodeResource(getResources(),
             R.drawable.board);
-        this.boardView = new ImageView(context);
-        this.boardView.setImageBitmap(this.board);
 
         for (int i = 0; i < this.numberOfCards; ++i)
         {
             this.cardImages[i] = BitmapFactory.decodeResource(getResources(),
                 this.cardArray[i]);
-            /*
-            this.cardViews[i] = new ImageView(context);
-            this.cardViews[i] = (ImageView) findViewById(this.cardArray[i]);
-            this.cardViews[i].setOnClickListener(new OnClickListener()
-                    {
-                        public void onClick(View v)
-                        {
-                            //Deck currentDeck = (Deck) v;
-                            //currentDeck.cards[5] = -1;
-                        }
-                    });
-                    */
         }
     }
 
@@ -335,7 +324,9 @@ public class Deck extends View
             deleteCard(i);
             score(i);
             if (haveIWon())
-                return 1;
+                iWon();
+                //return 1;
+            haveIWon();
             invalidate();
         }
         return 0;
@@ -388,6 +379,18 @@ public class Deck extends View
         System.out.println();
     }
 
+    private void iWon()
+    {
+        Log.v(TAG, "i won.");
+        init();
+        ++this.round;
+    }
+
+    private void youLost()
+    {
+        Log.v(TAG, "you lost.");
+    }
+
     @Override
     public boolean onTouchEvent(final MotionEvent ev)
     {
@@ -397,6 +400,15 @@ public class Deck extends View
 
         if (ev.getAction() != MotionEvent.ACTION_DOWN)
             return true;
+
+        // Click Here
+        if (x >= 0 && x <= this.cardWidth && y >= 215 && y <= 215+this.cardHeight)
+        {
+            if (this.stackRest == 1)
+            {
+                youLost();
+            }
+        }
 
         // Stack
         if (x >= 0 && x <= (this.stackRest-2)*12 + this.cardWidth &&
@@ -474,7 +486,8 @@ public class Deck extends View
                     if ((i < this.rows-1 && isFree(pos)) || (i >= this.rows-1))
                         currentCard = this.cardImages[this.cards[pos]];
                     else
-                        currentCard = this.blankCard;
+                        currentCard = this.cardImages[this.cards[pos]];
+                        //currentCard = this.blankCard;
 
                     canvas.drawBitmap(currentCard,
                             this.horizontalPadding + this.cardPositions[i][j],
@@ -484,6 +497,12 @@ public class Deck extends View
             }
         }
 
+        // Click Here
+        canvas.drawBitmap(this.clickHere,
+                this.horizontalPadding,
+                this.verticalPadding + 215, null);
+
+        // Stack
         for (int i = 0; i < this.stackRest-1; ++i)
         {
             canvas.drawBitmap(this.blankCard,
@@ -494,9 +513,27 @@ public class Deck extends View
         String s = ">>> stackCard (onDraw): " + getValue(this.stackCard);
         Log.v(TAG, s);
 
+        // Stack Card
         canvas.drawBitmap(this.cardImages[this.stackCard],
                 this.horizontalPadding + 350,
                 this.verticalPadding + 215, null);
+    }
+
+    private void init()
+    {
+        //this.pyramidBonus = 500;
+        this.stackPos = 28;
+        this.stackRest = this.numberOfCards - this.stackPos;
+        this.stackCard = cards[this.stackPos];
+        this.cardsToGo = 28;
+        this.run = 0;
+        this.currentWorth = 10;
+        this.pyramidBonus = (round+1)*250;
+        for (int i = 0; i < numberOfCards; ++i)
+        {
+            cards[i] = i;
+        }
+        shuffle();
     }
 
     public Deck(Context context)
@@ -504,21 +541,9 @@ public class Deck extends View
         super(context);
         cards = new int[numberOfCards];
         cardImages = new Bitmap[numberOfCards];
-        cardViews = new ImageView[numberOfCards];
-        for (int i = 0; i < numberOfCards; ++i)
-        {
-            cards[i] = i;
-        }
-        shuffle();
-        this.stackPos = 28;
-        this.stackRest = this.numberOfCards - this.stackPos;
-        this.stackCard = cards[this.stackPos];
-        this.cardsToGo = 28;
-        this.run = 0;
         this.score = 0;
-        this.currentWorth = 10;
+        init();
         this.round = 1;
-        this.pyramidBonus = 500;
         setBitmaps(context);
     }
 

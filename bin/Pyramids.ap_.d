@@ -4,6 +4,7 @@
 /home/test/android/Pyramids/res/drawable/card2.png \
 /home/test/android/Pyramids/res/drawable/card32.png \
 /home/test/android/Pyramids/res/drawable/card11.png \
+/home/test/android/Pyramids/res/drawable/gameover.png \
 /home/test/android/Pyramids/res/drawable/card20.png \
 /home/test/android/Pyramids/res/drawable/card31.png \
 /home/test/android/Pyramids/res/drawable/card49.png \
@@ -26,6 +27,7 @@
 /home/test/android/Pyramids/res/drawable/card21.png \
 /home/test/android/Pyramids/res/drawable/card30.png \
 /home/test/android/Pyramids/res/drawable/card3.png \
+/home/test/android/Pyramids/res/drawable/clickhere.png \
 /home/test/android/Pyramids/res/drawable/card9.png \
 /home/test/android/Pyramids/res/drawable/cardblank.png \
 /home/test/android/Pyramids/res/drawable/card1.png \
@@ -58,6 +60,7 @@
 /home/test/android/Pyramids/bin/res/drawable/card2.png \
 /home/test/android/Pyramids/bin/res/drawable/card32.png \
 /home/test/android/Pyramids/bin/res/drawable/card11.png \
+/home/test/android/Pyramids/bin/res/drawable/gameover.png \
 /home/test/android/Pyramids/bin/res/drawable/card20.png \
 /home/test/android/Pyramids/bin/res/drawable/card31.png \
 /home/test/android/Pyramids/bin/res/drawable/card49.png \
@@ -80,6 +83,7 @@
 /home/test/android/Pyramids/bin/res/drawable/card21.png \
 /home/test/android/Pyramids/bin/res/drawable/card30.png \
 /home/test/android/Pyramids/bin/res/drawable/card3.png \
+/home/test/android/Pyramids/bin/res/drawable/clickhere.png \
 /home/test/android/Pyramids/bin/res/drawable/card9.png \
 /home/test/android/Pyramids/bin/res/drawable/cardblank.png \
 /home/test/android/Pyramids/bin/res/drawable/card1.png \
