@@ -2,6 +2,7 @@ package com.example.pyramids;
 //import android.app.DrawView;
 
 import java.util.Random;
+import java.text.NumberFormat;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Canvas;
@@ -171,6 +172,11 @@ public class Deck extends View
             this.cards[i] = this.cards[randomCard];
             this.cards[randomCard] = temp;
         }
+    }
+
+    private String numWithCommas(int n)
+    {
+        return NumberFormat.getNumberInstance().format(n);
     }
 
     private String getValue(int num)
@@ -491,6 +497,7 @@ public class Deck extends View
         Paint paint = new Paint();
         paint.setColor(Color.BLACK);
         paint.setTextSize(18);
+        paint.setFakeBoldText(true);
         paint.setAntiAlias(true);
 
         String text = "Run: " + this.run;
@@ -498,7 +505,7 @@ public class Deck extends View
                 horizontalPadding + 10,
                 verticalPadding - 10,
                 paint);
-        text = "Score: " + this.score;
+        text = "Score: " + numWithCommas(this.score);
         canvas.drawText(text,
                 horizontalPadding + 230,
                 verticalPadding - 10,
@@ -559,10 +566,11 @@ public class Deck extends View
                     this.horizontalPadding + (boardWidth-gameOverWidth)/2 + 80,
                     this.verticalPadding + (boardHeight-gameOverHeight)/2 + 95,
                     null);
-            paint.setColor(Color.BLUE);
-            text = "" + this.score;
+            paint.setColor(0xff0000aa);
+            paint.setTextAlign(Paint.Align.RIGHT);
+            text = numWithCommas(this.score);
             canvas.drawText(text,
-                    this.horizontalPadding + (boardWidth-gameOverWidth)/2 + 120,
+                    this.horizontalPadding + (boardWidth-gameOverWidth)/2 + 220,
                     this.verticalPadding + (boardHeight-gameOverHeight)/2 + 66,
                     paint);
         }

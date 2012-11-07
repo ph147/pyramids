@@ -1,7 +1,6 @@
 /home/test/android/Pyramids/bin/classes.dex : \
 /home/test/android/Pyramids/bin/classes/com/example/pyramids/BuildConfig.class \
 /home/test/android/Pyramids/bin/classes/com/example/pyramids/Pyramids.class \
-/home/test/android/Pyramids/bin/classes/com/example/pyramids/Deck$1.class \
 /home/test/android/Pyramids/bin/classes/com/example/pyramids/R$string.class \
 /home/test/android/Pyramids/bin/classes/com/example/pyramids/Deck.class \
 /home/test/android/Pyramids/bin/classes/com/example/pyramids/R.class \
