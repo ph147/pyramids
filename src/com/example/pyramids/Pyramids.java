@@ -3,6 +3,7 @@ package com.example.pyramids;
 import android.app.Activity;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.util.DisplayMetrics;
 
 public class Pyramids extends Activity
 {
@@ -14,7 +15,12 @@ public class Pyramids extends Activity
     {
         super.onCreate(savedInstanceState);
 
-        deck = new Deck(this);
+        DisplayMetrics displaymetrics = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(displaymetrics);
+        int height = displaymetrics.heightPixels;
+        int width = displaymetrics.widthPixels;
+
+        deck = new Deck(this, width, height);
         deck.setBackgroundColor(0xff999966);
 
         setContentView(deck);

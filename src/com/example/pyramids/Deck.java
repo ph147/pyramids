@@ -11,8 +11,8 @@ import android.graphics.Paint;
 import android.graphics.Color;
 import android.view.View;
 import android.view.MotionEvent;
-import android.widget.ImageView;
 import android.util.Log;
+import android.util.DisplayMetrics;
 
 public class Deck extends View
 {
@@ -90,8 +90,8 @@ public class Deck extends View
     private final int rows = 4;
 
     // TODO dynamic padding
-    private final int horizontalPadding = 100;
-    private final int verticalPadding = 60;
+    private int horizontalPadding; // = 100;
+    private int verticalPadding; // = 60;
 
     private final int boardWidth = 565;
     private final int boardHeight = 298;
@@ -597,11 +597,10 @@ public class Deck extends View
         setBitmaps(context);
     }
 
-    public Deck(Context context, int round, int score)
+    public Deck(Context context, int width, int height)
     {
         this(context);
-        this.round = round;
-        this.score = score;
-        this.pyramidBonus = (round+1)*250;
+        this.horizontalPadding = (width-this.boardWidth)/2;
+        this.verticalPadding = (height-this.boardHeight-30)/2;
     }
 }
