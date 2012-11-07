@@ -23,10 +23,13 @@ public class Deck extends View
     
     private int height, width;
 
+    private boolean gameOver;
+
     private Bitmap board;
     private Bitmap blankCard;
     private Bitmap clickHere;
     private Bitmap gameOverField;
+    private Bitmap playAgain;
 
     private int[] cardArray = {
         R.drawable.card0,
@@ -90,6 +93,12 @@ public class Deck extends View
     private final int horizontalPadding = 100;
     private final int verticalPadding = 60;
 
+    private final int boardWidth = 565;
+    private final int boardHeight = 298;
+
+    private final int gameOverWidth = 231;
+    private final int gameOverHeight = 133;
+
     private final int cardWidth = 54;
     private final int cardHeight = 72;
 
@@ -136,6 +145,8 @@ public class Deck extends View
             R.drawable.clickhere);
         this.gameOverField = BitmapFactory.decodeResource(getResources(),
             R.drawable.gameover);
+        this.playAgain = BitmapFactory.decodeResource(getResources(),
+            R.drawable.playagain);
         this.blankCard = BitmapFactory.decodeResource(getResources(),
             R.drawable.cardblank);
         this.board = BitmapFactory.decodeResource(getResources(),
@@ -388,6 +399,8 @@ public class Deck extends View
 
     private void youLost()
     {
+        this.gameOver = true;
+        invalidate();
         Log.v(TAG, "you lost.");
     }
 
@@ -400,6 +413,25 @@ public class Deck extends View
 
         if (ev.getAction() != MotionEvent.ACTION_DOWN)
             return true;
+
+        // Play Again
+        int playX = (boardWidth-gameOverWidth)/2+80;
+        int playY = (boardHeight-gameOverHeight)/2+95;
+        if (gameOver)
+        {
+            if( x >= playX && x <= playX + 74 &&
+                y >= playY && y <= playY + 25)
+            {
+                Log.v(TAG, "playagain");
+                this.round = 1;
+                this.score = 0;
+                init();
+                this.gameOver = false;
+                invalidate();
+                // TODO save highscores
+            }
+            return true;
+        }
 
         // Click Here
         if (x >= 0 && x <= this.cardWidth && y >= 215 && y <= 215+this.cardHeight)
@@ -486,8 +518,7 @@ public class Deck extends View
                     if ((i < this.rows-1 && isFree(pos)) || (i >= this.rows-1))
                         currentCard = this.cardImages[this.cards[pos]];
                     else
-                        currentCard = this.cardImages[this.cards[pos]];
-                        //currentCard = this.blankCard;
+                        currentCard = this.blankCard;
 
                     canvas.drawBitmap(currentCard,
                             this.horizontalPadding + this.cardPositions[i][j],
@@ -517,6 +548,24 @@ public class Deck extends View
         canvas.drawBitmap(this.cardImages[this.stackCard],
                 this.horizontalPadding + 350,
                 this.verticalPadding + 215, null);
+
+        if (gameOver)
+        {
+            canvas.drawBitmap(this.gameOverField,
+                    this.horizontalPadding + (boardWidth-gameOverWidth)/2,
+                    this.verticalPadding + (boardHeight-gameOverHeight)/2,
+                    null);
+            canvas.drawBitmap(this.playAgain,
+                    this.horizontalPadding + (boardWidth-gameOverWidth)/2 + 80,
+                    this.verticalPadding + (boardHeight-gameOverHeight)/2 + 95,
+                    null);
+            paint.setColor(Color.BLUE);
+            text = "" + this.score;
+            canvas.drawText(text,
+                    this.horizontalPadding + (boardWidth-gameOverWidth)/2 + 120,
+                    this.verticalPadding + (boardHeight-gameOverHeight)/2 + 66,
+                    paint);
+        }
     }
 
     private void init()
@@ -542,6 +591,7 @@ public class Deck extends View
         cards = new int[numberOfCards];
         cardImages = new Bitmap[numberOfCards];
         this.score = 0;
+        this.gameOver = false;
         init();
         this.round = 1;
         setBitmaps(context);
