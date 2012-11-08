@@ -32,7 +32,7 @@ public class Pyramids extends Activity
 
         SharedPreferences saveState = getPreferences(0);
 
-        deck = new Deck(this, width, height, saveState);
+        deck = new Deck(this, displaymetrics, saveState);
         deck.setBackgroundColor(0xff999966);
 
         setContentView(deck);

@@ -22,6 +22,8 @@ public class Deck extends View
 {
     private static final String TAG = "Deck";
 
+    private DisplayMetrics dm;
+
     public static final int WON = 1;
     public static final int LOST = 2;
     
@@ -100,21 +102,30 @@ public class Deck extends View
     private int horizontalPadding; // = 100;
     private int verticalPadding; // = 60;
 
-    private final int boardWidth = 565;
-    private final int boardHeight = 298;
+    private int boardWidth;
+    private int boardHeight;
 
-    private final int gameOverWidth = 231;
-    private final int gameOverHeight = 133;
+    private int gameOverWidth;// = 231;
+    private int gameOverHeight;// = 133;
 
-    private final int cardWidth = 54;
-    private final int cardHeight = 72;
+    private int cardWidth;// = 54;
+    private int cardHeight;// = 72;
 
+    /*
     private final int[][] cardPositions =
         {
             {81, 243, 405},
             {54, 108, 216, 270, 378, 432},
             {27, 81, 135, 189, 243, 297, 351, 405, 459},
             {0, 54, 108, 162, 216, 270, 324, 378, 432, 486}
+        };
+        */
+    private final double[][] cardPositions =
+        {
+            {1.5, 4.5, 7.5},
+            {1.0, 2.0, 4.0, 5.0, 7.0, 8.0},
+            {0.5, 1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5, 8.5},
+            {0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0}
         };
     private final int[][] spaceCode =
         {
@@ -158,6 +169,18 @@ public class Deck extends View
             R.drawable.cardblank);
         this.board = BitmapFactory.decodeResource(getResources(),
             R.drawable.board);
+
+        this.gameOverWidth = gameOverField.getWidth();
+        this.gameOverHeight = gameOverField.getHeight();
+
+        this.cardWidth = blankCard.getWidth();
+        this.cardHeight = blankCard.getHeight();
+
+        this.boardWidth = board.getWidth();
+        this.boardHeight = board.getHeight();
+
+        this.horizontalPadding = (dm.widthPixels-boardWidth)/2;
+        this.verticalPadding = (dm.heightPixels-boardHeight)/2;
 
         for (int i = 0; i < this.numberOfCards; ++i)
         {
@@ -427,12 +450,14 @@ public class Deck extends View
             return true;
 
         // Play Again
-        int playX = (boardWidth-gameOverWidth)/2+80;
-        int playY = (boardHeight-gameOverHeight)/2+95;
+        int playX = (boardWidth-gameOverWidth)/2+58;
+        int playY = (boardHeight-gameOverHeight)/2+65;
+        int playWidth = this.playAgain.getWidth();
+        int playHeight = this.playAgain.getHeight();
         if (gameOver)
         {
-            if( x >= playX && x <= playX + 74 &&
-                y >= playY && y <= playY + 25)
+            if( x >= playX && x <= playX + playWidth &&
+                y >= playY && y <= playY + playHeight)
             {
                 Log.v(TAG, "playagain");
                 this.round = 1;
@@ -446,7 +471,9 @@ public class Deck extends View
         }
 
         // Click Here
-        if (x >= 0 && x <= this.cardWidth && y >= 215 && y <= 215+this.cardHeight)
+        if (x >= 0 && x <= this.cardWidth &&
+                y >= boardHeight-cardHeight-10 &&
+                y <= boardHeight-10)
         {
             if (this.stackRest == 1)
             {
@@ -456,8 +483,9 @@ public class Deck extends View
         }
 
         // Stack
-        if (x >= 0 && x <= (this.stackRest-2)*12 + this.cardWidth &&
-                y >= 215 && y <= 215 + this.cardHeight)
+        if (x >= 0 && x <= (this.stackRest-2)*8 + this.cardWidth &&
+                y >= boardHeight-cardHeight-10 &&
+                y <= boardHeight-10)
         {
             newRun();
             nextStack();
@@ -474,8 +502,8 @@ public class Deck extends View
                 if ((pos <= 17 && !isFree(pos)) || isDeleted(pos))
                     continue;
 
-                int cardX = this.cardPositions[i][j];
-                int cardY = i*36;
+                int cardX = ((int) (this.cardPositions[i][j])*cardWidth);
+                int cardY = i*(cardHeight/2);
 
                 if (
                         (x >= cardX) &&
@@ -510,34 +538,40 @@ public class Deck extends View
         Bitmap currentCard;
 
         canvas.drawBitmap(this.board,
-                this.horizontalPadding-5,
+                this.horizontalPadding-3,
                 this.verticalPadding-5, null);
 
         Paint paint = new Paint();
         paint.setColor(Color.BLACK);
-        paint.setTextSize(18);
+        paint.setTextSize(12);
         paint.setFakeBoldText(true);
         paint.setAntiAlias(true);
 
         String text = "Run: " + this.run;
         canvas.drawText(text,
-                horizontalPadding + 10,
+                horizontalPadding,
                 verticalPadding - 10,
                 paint);
+
+        paint.setTextAlign(Paint.Align.CENTER);
         text = "Score: " + numWithCommas(this.score);
         canvas.drawText(text,
-                horizontalPadding + 230,
+                horizontalPadding + boardWidth/2,
                 verticalPadding - 10,
                 paint);
+
+        paint.setTextAlign(Paint.Align.RIGHT);
         text = "Round: " + this.round;
         canvas.drawText(text,
-                horizontalPadding + 460,
+                horizontalPadding + boardWidth,
                 verticalPadding - 10,
                 paint);
+
+        paint.setTextAlign(Paint.Align.LEFT);
         text = "High Score: " + numWithCommas(this.highScore);
         canvas.drawText(text,
-                horizontalPadding + 10,
-                verticalPadding + 313,
+                horizontalPadding,
+                verticalPadding + boardHeight + 10,
                 paint);
 
         for (int i = 0; i < this.rows; ++i)
@@ -552,8 +586,8 @@ public class Deck extends View
                         currentCard = this.blankCard;
 
                     canvas.drawBitmap(currentCard,
-                            this.horizontalPadding + this.cardPositions[i][j],
-                            this.verticalPadding + i*36, null);
+                            this.horizontalPadding + ((int)(this.cardPositions[i][j]*cardWidth)),
+                            this.verticalPadding + i*(cardHeight/2), null);
                 }
                 ++pos;
             }
@@ -562,14 +596,14 @@ public class Deck extends View
         // Click Here
         canvas.drawBitmap(this.clickHere,
                 this.horizontalPadding,
-                this.verticalPadding + 215, null);
+                this.verticalPadding + boardHeight - cardHeight - 10, null);
 
         // Stack
         for (int i = 0; i < this.stackRest-1; ++i)
         {
             canvas.drawBitmap(this.blankCard,
-                    this.horizontalPadding + i*12,
-                    this.verticalPadding + 215, null);
+                    this.horizontalPadding + i*8,
+                    this.verticalPadding + boardHeight - cardHeight - 10, null);
         }
 
         String s = ">>> stackCard (onDraw): " + getValue(this.stackCard);
@@ -577,8 +611,8 @@ public class Deck extends View
 
         // Stack Card
         canvas.drawBitmap(this.cardImages[this.stackCard],
-                this.horizontalPadding + 350,
-                this.verticalPadding + 215, null);
+                this.horizontalPadding + 2*boardWidth/3,
+                this.verticalPadding + boardHeight - cardHeight - 10, null);
 
         if (gameOver)
         {
@@ -587,15 +621,15 @@ public class Deck extends View
                     this.verticalPadding + (boardHeight-gameOverHeight)/2,
                     null);
             canvas.drawBitmap(this.playAgain,
-                    this.horizontalPadding + (boardWidth-gameOverWidth)/2 + 80,
-                    this.verticalPadding + (boardHeight-gameOverHeight)/2 + 95,
+                    this.horizontalPadding + (boardWidth-gameOverWidth)/2 + 58,
+                    this.verticalPadding + (boardHeight-gameOverHeight)/2 + 65,
                     null);
             paint.setColor(0xff0000aa);
             paint.setTextAlign(Paint.Align.RIGHT);
             text = numWithCommas(this.score);
             canvas.drawText(text,
-                    this.horizontalPadding + (boardWidth-gameOverWidth)/2 + 220,
-                    this.verticalPadding + (boardHeight-gameOverHeight)/2 + 66,
+                    this.horizontalPadding + (boardWidth-gameOverWidth)/2 + 145,
+                    this.verticalPadding + (boardHeight-gameOverHeight)/2 + 44,
                     paint);
         }
     }
@@ -636,14 +670,13 @@ public class Deck extends View
         this.gameOver = false;
         init();
         this.round = 1;
-        setBitmaps(context);
     }
 
-    public Deck(Context context, int width, int height, SharedPreferences save)
+    public Deck(Context context, DisplayMetrics dm, SharedPreferences save)
     {
         this(context);
-        this.horizontalPadding = (width-this.boardWidth)/2;
-        this.verticalPadding = (height-this.boardHeight-30)/2;
+        this.dm = dm;
+        setBitmaps(context);
 
         this.saveState = save;
         this.highScore = save.getInt("highscore", 0);
