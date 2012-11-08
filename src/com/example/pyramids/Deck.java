@@ -1,10 +1,13 @@
 package com.example.pyramids;
 //import android.app.DrawView;
 
+import android.app.Activity;
 import java.util.Random;
+import java.util.Date;
 import java.text.NumberFormat;
 import android.app.Activity;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Canvas;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -23,6 +26,9 @@ public class Deck extends View
     public static final int LOST = 2;
     
     private int height, width;
+
+    private SharedPreferences saveState;
+    private int highScore;
 
     private boolean gameOver;
 
@@ -343,7 +349,6 @@ public class Deck extends View
             if (haveIWon())
                 iWon();
                 //return 1;
-            haveIWon();
             invalidate();
         }
         return 0;
@@ -405,6 +410,7 @@ public class Deck extends View
 
     private void youLost()
     {
+        newHighscore(this.score);
         this.gameOver = true;
         invalidate();
         Log.v(TAG, "you lost.");
@@ -445,6 +451,7 @@ public class Deck extends View
             if (this.stackRest == 1)
             {
                 youLost();
+                return true;
             }
         }
 
@@ -455,12 +462,18 @@ public class Deck extends View
             newRun();
             nextStack();
             invalidate();
+            return true;
         }
 
+        pos = -1;
         for (int i = 0; i < this.cardPositions.length; ++i)
         {
             for (int j = 0; j < this.cardPositions[i].length; ++j)
             {
+                ++pos;
+                if ((pos <= 17 && !isFree(pos)) || isDeleted(pos))
+                    continue;
+
                 int cardX = this.cardPositions[i][j];
                 int cardY = i*36;
 
@@ -476,11 +489,17 @@ public class Deck extends View
                     String s = ": " + pos;
                     Log.v(TAG, s);
                     move(pos);
+                    return true;
                 }
-                ++pos;
             }
         }
         return true;
+    }
+
+    private void printTime(long start)
+    {
+        String s = "time: " + ((new Date().getTime())-start);
+        Log.v(TAG, s);
     }
 
     @Override
@@ -514,6 +533,11 @@ public class Deck extends View
         canvas.drawText(text,
                 horizontalPadding + 460,
                 verticalPadding - 10,
+                paint);
+        text = "High Score: " + numWithCommas(this.highScore);
+        canvas.drawText(text,
+                horizontalPadding + 10,
+                verticalPadding + 313,
                 paint);
 
         for (int i = 0; i < this.rows; ++i)
@@ -593,6 +617,16 @@ public class Deck extends View
         shuffle();
     }
 
+    private void newHighscore(int score)
+    {
+        if (score <= this.highScore)
+            return;
+        this.highScore = score;
+        SharedPreferences.Editor editor = this.saveState.edit();
+        editor.putInt("highscore", this.highScore);
+        editor.commit();
+    }
+
     public Deck(Context context)
     {
         super(context);
@@ -605,10 +639,13 @@ public class Deck extends View
         setBitmaps(context);
     }
 
-    public Deck(Context context, int width, int height)
+    public Deck(Context context, int width, int height, SharedPreferences save)
     {
         this(context);
         this.horizontalPadding = (width-this.boardWidth)/2;
         this.verticalPadding = (height-this.boardHeight-30)/2;
+
+        this.saveState = save;
+        this.highScore = save.getInt("highscore", 0);
     }
 }
